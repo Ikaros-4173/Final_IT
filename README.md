@@ -4,11 +4,15 @@ A continuación les doy acceso al proyecto de unity se sera utilizado apra el pr
 Requeriments:
 
 Unity 2017 1.0 f3 or later versions
- sudo dpkg -i unity-editor_amd64-207.1.0xf3Linux.deb
+
+sudo dpkg -i unity-editor_amd64-207.1.0xf3Linux.deb
  
 Create a virtual environment
+
 virtualenv -p python3 env
+
 source env/bin/activate
 
 Install Flask through pip
+
 pip install flask
