@@ -39,16 +39,3 @@ def doy_y_recibo():
     c.close()
 
 doy_y_recibo()#calling the function to run server
-
-@app.route("/") #Script de prueba
-def hello():
-    return "¡Ola k ase, programando o k ase :v !"
-
-
-@application.route("/", methods=['GET'])
-def root():
-    """Return contents found in /.""" #comentarios random para no enredarme en la programación
-    return 'Desarrollando a Ikaros, fase de depuracion del nucleo de ala variable.'
-
-if __name__ == "__main__":
-    app.run()

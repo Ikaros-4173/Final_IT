@@ -4,14 +4,7 @@ using UnityEngine;
 using System.Collections;
 using System;
 ﻿using System.Collections.Generic;
-/* Se implementan socket para la conexión de python con Unity por Ikaros-4173 o sea yo :v
- */
-using UnityEngine;
-using System.Net;
-using System.Net.Sockets;
-using System.Linq;
-/*Librerias para socket
-*/
+
 public class PlayerMovement : MonoBehaviour
 {
     public static PlayerMovement player;
@@ -259,34 +252,6 @@ public class PlayerMovement : MonoBehaviour
         GlobalVariables.global.resetFollower();
     }
 
-    public void Changing()
-	{
-		client = new Socket (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-		client.Connect (IP, Port);//connecting port with ip address
-		dane = System.Text.Encoding.ASCII.GetBytes(transform.localScale.ToString());//decode string  data into byte for sending
-		client.Send (dane);//send data to port
-		byte[] b = new byte[1024];
-		int k = client.Receive(b);//recive data from port coming from python script
-		string szReceived = System.Text.Encoding.ASCII.GetString(b, 0, k);//coming data is in bytes converting into string
-		if (client.Connected)
-		{
-			Debug.Log ("Getting data from Python ");
-			Debug.Log (szReceived);//showing data on the unity log
-
-			string[] words = szReceived.Split(' ');//split data into string data is in 2.2 3.3 4.0
-			float x = float.Parse (words[0]);//convert into float 1 num and save to x like x axis
-			float y = float.Parse (words[1]);//convert into float 2 num and save to y like y axis
-			float z = float.Parse (words[2]);//convert into float 3 num and save to z like z axis
-			transform.localScale+=new Vector3(x,y,z);//put thes value into object of unity  to change
-		}
-		else
-		{
-			Debug.Log (" Not Connected");
-
-		}
-		client.Close();
-  }
-
 
 
     void Update()/*En esta linea se tiene que recibir los estados
@@ -294,6 +259,7 @@ public class PlayerMovement : MonoBehaviour
     del socket en este .cs
     */
     {
+      Changing ();
         //check for new inputs, so that the new direction can be set accordingly
         if (Input.GetButtonDown("Horizontal"))
         {
