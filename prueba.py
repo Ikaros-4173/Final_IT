@@ -1,54 +1,61 @@
 import json
-from flask import Flask, request, abort, jsonify
+#from flask import Flask, request, abort, jsonify
 import socket
-app = Flask(__name__)
+from statemachine import StateMachine, State
+import numpy as np
+import cv2
+import imutils
+#app = Flask(__name__)
 
-application = Flask(__name__)
-application.config['JSON_AS_ASCII'] = False
+#application = Flask(__name__)
+#application.config['JSON_AS_ASCII'] = False
 
+#Estados a declarar
+
+class ashmostaza(StateMachine):
+
+    parado = State('parado', initial=True)
+    izquierda = State('izquierda')
+    derecha = State('derecha')
+
+    quieto = parado.to(parado)
+    ir_izquierda = parado.to(izquierda)
+    mantener_izquierda = izquierda.to(izquierda)
+    ir_derecha = parado.to(derecha)
+    mantener_derecha = derecha.to(derecha)
 #A partir de aqui se implementa el socket hacia python como cliente
 
-def doy_y_recibo():
-    s = socket.socket()
-    print('socket creado ')
-    port = 1234
-    s.bind(('127.0.0.1', port)) #bind port with ip address
-    print('socket binded to port ')
-    s.listen(5)#listening for connection
-    print('socket listensing ... ')
+host = 'localhost'
+port = 50000
+backlog = 5
+size = 1024
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.bind((host,port))
+s.listen(backlog)
 
-    while True:
-        c, addr = s.accept() #when port connected
-        print("\ngot connection from ", addr)
-        de=c.recv(1024).decode("utf-8") #Collect data from port and decode into  string
-        print('Tomando datos de Unity : ',de)
+while 1:
+    client, address = s.accept()
+    print ("Client connected.")
+    while 1:
+        data = client.recv(size)
+        if data == "ping":
+            print ("Unity Sent: " + str(data))
+            client.send("pong")
+        else:
+            client.send("Bye!")
+            print ("Unity Sent Something Else: " + str(data))
+            client.close()
+            break
 
-        list=de.split(',') #cominda data is postion so we split into list on basis of ,
-
-        UpdateValue=""
-
-    for value in list: #loop for each value in the string single
-            value=str(value)#sonvet list value into string
-            if '(' in value or ')' in value: #coming data in to form of (1.0,2.2,3.0),when split then we check each value dosnt contan '(' or ')'
-                value=value.replace('(','') #if it ( contain any one of these we remove it
-                value=value.replace(')', '')#if it ) contain any one of these we remove it
-            C_value=float(value) #convert string value into float
-            UpdateValue=UpdateValue+(str(C_value+3.0))+" " #add 3.0 into float value and put it in a string
-    print('After changing data sending back to Unity')
-    c.sendall(UpdateValue[:-1].encode("utf-8"))#then encode and send taht string back to unity
-    c.close()
-
-doy_y_recibo()#calling the function to run server
-
-@app.route("/") #Script de prueba
-def hello():
-    return "¡Ola k ase, programando o k ase :v !"
+#@app.route("/") #Script de prueba
+#def hello():
+    #return "¡Ola k ase, programando o k ase :v !"
 
 
-@application.route("/", methods=['GET'])
-def root():
-    """Return contents found in /.""" #comentarios random para no enredarme en la programación
-    return 'Desarrollando a Ikaros, fase de depuracion del nucleo de ala variable.'
+#@application.route("/", methods=['GET'])
+#def root():
+    #"""Return contents found in /.""" #comentarios random para no enredarme en la programación
+    #return 'Desarrollando a Ikaros, fase de depuracion del nucleo de ala variable.'
 
-if __name__ == "__main__":
-    app.run()
+#if __name__ == "__main__":
+    #app.run()

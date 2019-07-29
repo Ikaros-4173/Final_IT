@@ -1,12 +1,2 @@
 Base path: /home/alexander/Unity/Hub/Editor/2019.1.10f1/Editor/Data
 Cmd: initializeCompiler
-Cmd: preprocess
-  insize=3207 outsize=1205 ok=1
-Cmd: preprocess
-  insize=1119 outsize=1620 ok=1
-Cmd: preprocess
-  insize=3080 outsize=893 ok=1
-Cmd: preprocess
-  insize=2582 outsize=1197 ok=1
-Cmd: preprocess
-  insize=1160 outsize=1618 ok=1

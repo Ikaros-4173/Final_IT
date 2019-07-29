@@ -6,13 +6,65 @@ using System;
 ﻿using System.Collections.Generic;
 /* Se implementan socket para la conexión de python con Unity por Ikaros-4173 o sea yo :v
  */
-using UnityEngine;
-using System.Net;
+
+using System.IO;
 using System.Net.Sockets;
-using System.Linq;
+using Newtonsoft.Json;
+using System.Threading;
 /*Librerias para socket
 */
-public class PlayerMovement : MonoBehaviour
+
+public class networkSocketSO : MonoBehaviour
+{
+    public String host = "localhost";
+    public Int32 port = 50000;
+
+    internal Boolean socket_ready = false;
+    internal String input_buffer = "";
+
+    TcpClient tcp_socket;
+    NetworkStream net_stream;
+
+    StreamWriter socket_writer;
+    StreamReader socket_reader;
+
+    private void Start()
+    {
+        setupSocket();
+    }
+
+    private void setupSocket()
+    {
+        throw new NotImplementedException();
+    }
+
+    void Update()
+    {
+        string received_data = readSocket();
+        switch (received_data)
+        {
+            case "pong":
+                Debug.Log("Python controller sent: " + (string)received_data);
+                writeSocket("ping");
+                break;
+            default:
+                Debug.Log("Nothing received");
+                break;
+        }
+    }
+
+    private void writeSocket(string v)
+    {
+        throw new NotImplementedException();
+    }
+
+    private string readSocket()
+    {
+        throw new NotImplementedException();
+    }
+}
+
+    public class PlayerMovement : MonoBehaviour
 {
     public static PlayerMovement player;
 
@@ -259,35 +311,100 @@ public class PlayerMovement : MonoBehaviour
         GlobalVariables.global.resetFollower();
     }
 
-    public void Changing()
-	{
-		client = new Socket (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-		client.Connect (IP, Port);//connecting port with ip address
-		dane = System.Text.Encoding.ASCII.GetBytes(transform.localScale.ToString());//decode string  data into byte for sending
-		client.Send (dane);//send data to port
-		byte[] b = new byte[1024];
-		int k = client.Receive(b);//recive data from port coming from python script
-		string szReceived = System.Text.Encoding.ASCII.GetString(b, 0, k);//coming data is in bytes converting into string
-		if (client.Connected)
-		{
-			Debug.Log ("Getting data from Python ");
-			Debug.Log (szReceived);//showing data on the unity log
+    public class networkSocketSO : MonoBehaviour
+{
+    public String host = "localhost";
+    public Int32 port = 50000;
 
-			string[] words = szReceived.Split(' ');//split data into string data is in 2.2 3.3 4.0
-			float x = float.Parse (words[0]);//convert into float 1 num and save to x like x axis
-			float y = float.Parse (words[1]);//convert into float 2 num and save to y like y axis
-			float z = float.Parse (words[2]);//convert into float 3 num and save to z like z axis
-			transform.localScale+=new Vector3(x,y,z);//put thes value into object of unity  to change
-		}
-		else
-		{
-			Debug.Log (" Not Connected");
+    internal Boolean socket_ready = false;
+    internal String input_buffer = "";
 
-		}
-		client.Close();
-  }
+    TcpClient tcp_socket;
+    NetworkStream net_stream;
+
+    StreamWriter socket_writer;
+    StreamReader socket_reader;
+
+    private void Start()
+    {
+        setupSocket();
+    }
 
 
+     void Update()
+     {
+        string received_data = readSocket();
+        switch (received_data)
+             {
+                 case "pong":
+                     Debug.Log("Python controller sent: " + (string)received_data);
+                     writeSocket("ping");
+                     break;
+                 default:
+                     Debug.Log("Nothing received");
+                     break;
+         }
+     }
+
+    void OnApplicationQuit()
+    {
+        closeSocket();
+    }
+
+    // Helper methods for:
+    //...setting up the communication
+    public void setupSocket()
+    {
+        try
+        {
+            tcp_socket = new TcpClient(host, port);
+            net_stream = tcp_socket.GetStream();
+            socket_writer = new StreamWriter(net_stream);
+            socket_reader = new StreamReader(net_stream);
+            socket_ready = true;
+        }
+        catch (Exception e)
+        {
+            // Something went wrong
+            Debug.Log("Socket error: " + e);
+        }
+    }
+
+    //... writing to a socket...
+    public void writeSocket(string line)
+    {
+        if (!socket_ready)
+            return;
+
+        line = line + "\r\n";
+        socket_writer.Write(line);
+        socket_writer.Flush();
+    }
+
+    //... reading from a socket...
+    public String readSocket()
+    {
+        if (!socket_ready)
+            return "";
+
+        if (net_stream.DataAvailable)
+            return socket_reader.ReadLine();
+
+        return "";
+    }
+
+    //... closing a socket...
+    public void closeSocket()
+    {
+        if (!socket_ready)
+            return;
+
+        socket_writer.Close();
+        socket_reader.Close();
+        tcp_socket.Close();
+        socket_ready = false;
+    }
+}
 
     void Update()/*En esta linea se tiene que recibir los estados
     desde el script de python server.py. Se debe tener claro la implementacion del servidor
